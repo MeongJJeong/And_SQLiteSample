@@ -30,9 +30,9 @@ public class MainActivity extends AppCompatActivity {
         Button buttonSave = (Button) findViewById(R.id.buttonSave);
         Button buttonClear = (Button) findViewById(R.id.buttonClear);
 
-        buttonSave.setOnClickListener(new View.OnClickListener() {
+        buttonSave.setOnClickListener(new Button.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
                 save_values();
             }
         });
@@ -50,11 +50,12 @@ public class MainActivity extends AppCompatActivity {
 
         if (sqliteDB != null){
             String sqlDelete = "DELETE FROM CONTACT_T" ;
+            //String sqlDelete = "DROP TABLE CONTACT_T";
 
             sqliteDB.execSQL((sqlDelete));
 
-            EditText editTextNo = (EditText)findViewById(R.id.edtTextNo);
-            editTextNo.setText("");
+            EditText editTextNum = (EditText) findViewById(R.id.edtTextNo);
+            editTextNum.setText("");
 
             EditText editTextName = (EditText) findViewById(R.id.edtTextName);
             editTextName.setText("");
@@ -75,11 +76,11 @@ public class MainActivity extends AppCompatActivity {
             // delete
             sqliteDB.execSQL("DELETE FROM CONTACT_T");
 
-            EditText editTextNo = (EditText)findViewById(R.id.edtTextNo);
-            String noText = editTextNo.getText().toString();
-            int no = 0;
-            if (noText != null && !noText.isEmpty()){
-                no = Integer.parseInt(noText);
+            EditText editTextNum = (EditText) findViewById(R.id.edtTextNo);
+            String noText = editTextNum.getText().toString();
+            int num = 0;
+            if(noText != null && !noText.isEmpty()){
+                num = Integer.parseInt(noText);
             }
 
             EditText editTextName = (EditText) findViewById(R.id.edtTextName);
@@ -93,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
             String sqlInsert = "INSERT INTO CONTACT_T" +
                     "(NUM, NAME, PHONE, OVER20) VALUES (" +
-                    Integer.toString(no) + "," +
+                    "'" + num + "'," +
                     "'" + name + "'," +
                     "'" + phone + "',"+
                     ((isOver20 == true) ? "1" : "0") + ")";
@@ -107,16 +108,15 @@ public class MainActivity extends AppCompatActivity {
 
         if (sqliteDB != null){
             String sqlQueryTbl = "SELECT * FROM CONTACT_T";
-            Cursor cursor = null;
 
             // 쿼리 실행
-            cursor = sqliteDB.rawQuery(sqlQueryTbl,null);
+            Cursor cursor = sqliteDB.rawQuery(sqlQueryTbl, null);
 
             if (cursor.moveToNext()){ //레코드가 존재한다면,
-                // no (INTEGER) 값 가져오기.
-                int no = cursor.getInt(0);
-                EditText editTextNo = (EditText)findViewById(R.id.edtTextNo);
-                editTextNo.setText(Integer.toString(no));
+                // num (INTEGER) 값 가져오기.
+                int num = cursor.getInt(0);
+                EditText editTextNum = (EditText) findViewById(R.id.edtTextNo);
+                editTextNum.setText(Integer.toString(num));
 
                 // name (TEXT) 값 가져오기.
                 String name = cursor.getString(1);
@@ -145,10 +145,10 @@ public class MainActivity extends AppCompatActivity {
 
         if(sqliteDB != null){
             String sqlCreateTbl = "CREATE TABLE IF NOT EXISTS CONTACT_T (" +
-                    "NUM"       + "INTEGER NOT NULL," +
-                    "NAME"      + "TEXT," +
-                    "PHONE"     + "TEXT," +
-                    "OVER20"    + "INTEGER" + ")" ;
+                    "NUM "        + "INTEGER, " +
+                    "NAME "      + "TEXT," +
+                    "PHONE "     + "TEXT," +
+                    "OVER20 "    + "INTEGER" + ")" ;
 
             System.out.println(sqlCreateTbl);
             sqliteDB.execSQL(sqlCreateTbl);
