@@ -17,6 +17,7 @@ import java.io.File;
 public class MainActivity extends AppCompatActivity {
 
     SQLiteDatabase sqliteDB;
+    ContactDBHelper dbHelper = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,69 +49,65 @@ public class MainActivity extends AppCompatActivity {
 
     private void delete_values() {
 
-        if (sqliteDB != null){
-            String sqlDelete = "DELETE FROM CONTACT_T" ;
-            //String sqlDelete = "DROP TABLE CONTACT_T";
 
-            sqliteDB.execSQL((sqlDelete));
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-            EditText editTextNum = (EditText) findViewById(R.id.edtTextNo);
-            editTextNum.setText("");
+        db.execSQL(ContactDBCtrct.SQL_DELETE);
 
-            EditText editTextName = (EditText) findViewById(R.id.edtTextName);
-            editTextName.setText("");
+        EditText editTextNum = (EditText) findViewById(R.id.edtTextNo);
+        editTextNum.setText("");
 
-            EditText editTextPhone = (EditText) findViewById(R.id.edtTextPhone);
-            editTextPhone.setText("");
+        EditText editTextName = (EditText) findViewById(R.id.edtTextName);
+        editTextName.setText("");
 
-            CheckBox checkBoxOver20 = (CheckBox) findViewById(R.id.checkBoxOver20);
-            checkBoxOver20.setChecked(false);
+        EditText editTextPhone = (EditText) findViewById(R.id.edtTextPhone);
+        editTextPhone.setText("");
 
-        }
+        CheckBox checkBoxOver20 = (CheckBox) findViewById(R.id.checkBoxOver20);
+        checkBoxOver20.setChecked(false);
     }
 
     private void save_values() {
 
-        if (sqliteDB != null){
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-            // delete
-            sqliteDB.execSQL("DELETE FROM CONTACT_T");
+        db.execSQL(ContactDBCtrct.SQL_DELETE);
 
-            EditText editTextNum = (EditText) findViewById(R.id.edtTextNo);
-            String noText = editTextNum.getText().toString();
-            int num = 0;
-            if(noText != null && !noText.isEmpty()){
-                num = Integer.parseInt(noText);
-            }
-
-            EditText editTextName = (EditText) findViewById(R.id.edtTextName);
-            String name = editTextName.getText().toString();
-
-            EditText editTextPhone = (EditText) findViewById(R.id.edtTextPhone);
-            String phone = editTextPhone.getText().toString();
-
-            CheckBox checkBoxOver20 = (CheckBox) findViewById(R.id.checkBoxOver20);
-            boolean isOver20 = checkBoxOver20.isChecked();
-
-            String sqlInsert = "INSERT INTO CONTACT_T" +
-                    "(NUM, NAME, PHONE, OVER20) VALUES (" +
-                    "'" + num + "'," +
-                    "'" + name + "'," +
-                    "'" + phone + "',"+
-                    ((isOver20 == true) ? "1" : "0") + ")";
-
-            System.out.println(sqlInsert);
-            sqliteDB.execSQL(sqlInsert);
+        EditText editTextNum = (EditText) findViewById(R.id.edtTextNo);
+        String noText = editTextNum.getText().toString();
+        int num = 0;
+        if(noText != null && !noText.isEmpty()){
+            num = Integer.parseInt(noText);
         }
+
+        EditText editTextName = (EditText) findViewById(R.id.edtTextName);
+        String name = editTextName.getText().toString();
+
+        EditText editTextPhone = (EditText) findViewById(R.id.edtTextPhone);
+        String phone = editTextPhone.getText().toString();
+
+        CheckBox checkBoxOver20 = (CheckBox) findViewById(R.id.checkBoxOver20);
+        boolean isOver20 = checkBoxOver20.isChecked();
+
+        String sqlInsert = ContactDBCtrct.SQL_INSERT +
+                "(" +
+                Integer.toString(num) + ", " +
+                "'" + name + "', "+
+                "'" + phone + "', "+
+                ((isOver20 == true) ? "1" : "0") +
+                ")" ;
+
+        db.execSQL(sqlInsert) ;
+
+
     }
 
     private void load_values() {
 
         if (sqliteDB != null){
-            String sqlQueryTbl = "SELECT * FROM CONTACT_T";
 
-            // 쿼리 실행
-            Cursor cursor = sqliteDB.rawQuery(sqlQueryTbl, null);
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            Cursor cursor = db.rawQuery(ContactDBCtrct.SQL_SELECT, null);
 
             if (cursor.moveToNext()){ //레코드가 존재한다면,
                 // num (INTEGER) 값 가져오기.
@@ -143,22 +140,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void init_tables() {
 
-        if(sqliteDB != null){
-            String sqlCreateTbl = "CREATE TABLE IF NOT EXISTS CONTACT_T (" +
-                    "NUM "        + "INTEGER, " +
-                    "NAME "      + "TEXT," +
-                    "PHONE "     + "TEXT," +
-                    "OVER20 "    + "INTEGER" + ")" ;
-
-            System.out.println(sqlCreateTbl);
-            sqliteDB.execSQL(sqlCreateTbl);
-        }
+        dbHelper = new ContactDBHelper(this);
     }
 
     private SQLiteDatabase init_database() {
 
         SQLiteDatabase db = null;
-//        File file = getDatabasePath("contact.db");
         File file = new File(getFilesDir(),"contact.db");
 
         System.out.println("PATH : "+ file.toString());
@@ -175,4 +162,5 @@ public class MainActivity extends AppCompatActivity {
 
         return db ;
     }
+
 }
